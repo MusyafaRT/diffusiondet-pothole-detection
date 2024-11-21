@@ -1,0 +1,25 @@
+_BASE_: "Base-DiffusionDet.yaml"
+MODEL:
+  WEIGHTS: "detectron2://ImageNetPretrained/torchvision/R-50.pkl"
+  RESNETS:
+    DEPTH: 50
+    STRIDE_IN_1X1: False
+  DiffusionDet:
+    NUM_PROPOSALS: 500
+    NUM_CLASSES: 1
+DATASETS:
+  TRAIN: ("pothole_train",)
+  TEST: ("pothole_val",)
+SOLVER:
+  IMS_PER_BATCH: 1
+  STEPS: (20000, 30000)
+  MAX_ITER: 50000
+INPUT:
+  MIN_SIZE_TRAIN: (480, 512, 544, 576, 608, 640, 672, 704, 736, 768, 800)
+  CROP:
+    ENABLED: True
+  FORMAT: "RGB"
+DATALOADER:
+  NUM_WORKERS: 8
+TEST:
+  EVAL_PERIOD: 10000
