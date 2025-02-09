@@ -60,8 +60,10 @@ class Trainer(DefaultTrainer):
         Args:
             cfg (CfgNode):
         """
-        register_pothole_dataset("pothole_train", "preprocessed_dataset/annotations/train.json", "preprocessed_dataset/train/")
-        register_pothole_dataset("pothole_val", "preprocessed_dataset/annotations/val.json", "preprocessed_dataset/val/")
+        register_pothole_dataset("pothole_train",  os.path.join(dataset_base, "annotations/train.json"),
+            os.path.join(dataset_base, "train/"))
+        register_pothole_dataset("pothole_val", os.path.join(dataset_base, "annotations/val.json"),
+            os.path.join(dataset_base, "val/"))
         super(DefaultTrainer, self).__init__()  # call grandfather's `__init__` while avoid father's `__init()`
         logger = logging.getLogger("detectron2")
         if not logger.isEnabledFor(logging.INFO):  # setup_logger is not called for d2
@@ -187,8 +189,10 @@ class Trainer(DefaultTrainer):
 
     @classmethod
     def ema_test(cls, cfg, model, evaluators=None):
-        register_pothole_dataset("pothole_train", "preprocessed_dataset/annotations/train.json", "preprocessed_dataset/train/")
-        register_pothole_dataset("pothole_val", "preprocessed_dataset/annotations/val.json", "preprocessed_dataset/val/")
+         register_pothole_dataset("pothole_train",  os.path.join(dataset_base, "annotations/train.json"),
+            os.path.join(dataset_base, "train/"))
+        register_pothole_dataset("pothole_val", os.path.join(dataset_base, "annotations/val.json"),
+            os.path.join(dataset_base, "val/"))
         # model with ema weights
         logger = logging.getLogger("detectron2.trainer")
         if cfg.MODEL_EMA.ENABLED:
@@ -306,7 +310,11 @@ def main(args):
 
 
 if __name__ == "__main__":
-    args = default_argument_parser().parse_args()
+    parser = default_argument_parser()
+    # Add dataset base path argument
+    parser.add_argument('--dataset', required=True,
+                      help='base path to dataset directory')
+    args = parser.parse_args()
     print("Command Line Args:", args)
     launch(
         main,
