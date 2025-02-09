@@ -60,10 +60,8 @@ class Trainer(DefaultTrainer):
         Args:
             cfg (CfgNode):
         """
-        register_pothole_dataset("pothole_train",  os.path.join(dataset_base, "annotations/train.json"),
-            os.path.join(dataset_base, "train/"))
-        register_pothole_dataset("pothole_val", os.path.join(dataset_base, "annotations/val.json"),
-            os.path.join(dataset_base, "val/"))
+        register_pothole_dataset("pothole_train",  os.path.join(dataset_base, "annotations/train.json"), os.path.join(dataset_base, "train/"))
+        register_pothole_dataset("pothole_val", os.path.join(dataset_base, "annotations/val.json"), os.path.join(dataset_base, "val/"))
         super(DefaultTrainer, self).__init__()  # call grandfather's `__init__` while avoid father's `__init()`
         logger = logging.getLogger("detectron2")
         if not logger.isEnabledFor(logging.INFO):  # setup_logger is not called for d2
@@ -189,10 +187,8 @@ class Trainer(DefaultTrainer):
 
     @classmethod
     def ema_test(cls, cfg, model, evaluators=None):
-         register_pothole_dataset("pothole_train",  os.path.join(dataset_base, "annotations/train.json"),
-            os.path.join(dataset_base, "train/"))
-        register_pothole_dataset("pothole_val", os.path.join(dataset_base, "annotations/val.json"),
-            os.path.join(dataset_base, "val/"))
+        register_pothole_dataset("pothole_train",  os.path.join(dataset_base, "annotations/train.json"), os.path.join(dataset_base, "train/"))
+        register_pothole_dataset("pothole_val", os.path.join(dataset_base, "annotations/val.json"), os.path.join(dataset_base, "val/"))
         # model with ema weights
         logger = logging.getLogger("detectron2.trainer")
         if cfg.MODEL_EMA.ENABLED:
