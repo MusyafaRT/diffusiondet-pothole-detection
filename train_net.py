@@ -49,9 +49,6 @@ def register_pothole_dataset(name, json_file, image_root):
     register_coco_instances(name, {}, json_file, image_root)
     print(f"Successfully registered dataset: {name}")
 
-# Register custom datasets
-
-
 class Trainer(DefaultTrainer):
     """ Extension of the Trainer class adapted to DiffusionDet. """
 
@@ -60,8 +57,21 @@ class Trainer(DefaultTrainer):
         Args:
             cfg (CfgNode):
         """
-        register_pothole_dataset("pothole_train",  os.path.join(dataset_base, "annotations/train.json"), os.path.join(dataset_base, "train/"))
-        register_pothole_dataset("pothole_val", os.path.join(dataset_base, "annotations/val.json"), os.path.join(dataset_base, "val/"))
+        if not hasattr(cfg.DATASETS, 'BASE_PATH'):
+            raise ValueError("Dataset path must be specified using --dataset argument")
+            
+        dataset_base = cfg.DATASETS.BASE_PATH
+        register_pothole_dataset(
+            "pothole_train", 
+            os.path.join(dataset_base, "annotations/train.json"),
+            os.path.join(dataset_base, "train/")
+        )
+        register_pothole_dataset(
+            "pothole_val", 
+            os.path.join(dataset_base, "annotations/val.json"),
+            os.path.join(dataset_base, "val/")
+        )
+        
         super(DefaultTrainer, self).__init__()  # call grandfather's `__init__` while avoid father's `__init()`
         logger = logging.getLogger("detectron2")
         if not logger.isEnabledFor(logging.INFO):  # setup_logger is not called for d2
@@ -90,7 +100,6 @@ class Trainer(DefaultTrainer):
             model,
             cfg.OUTPUT_DIR,
             **kwargs,
-            # trainer=weakref.proxy(self),
         )
         self.start_iter = 0
         self.max_iter = cfg.SOLVER.MAX_ITER
@@ -122,8 +131,6 @@ class Trainer(DefaultTrainer):
         For your own dataset, you can simply create an evaluator manually in your
         script and do not have to worry about the hacky if-else logic here.
         """
-
-      
         if output_folder is None:
             output_folder = os.path.join(cfg.OUTPUT_DIR, "inference")
         if 'lvis' in dataset_name:
@@ -187,8 +194,20 @@ class Trainer(DefaultTrainer):
 
     @classmethod
     def ema_test(cls, cfg, model, evaluators=None):
-        register_pothole_dataset("pothole_train",  os.path.join(dataset_base, "annotations/train.json"), os.path.join(dataset_base, "train/"))
-        register_pothole_dataset("pothole_val", os.path.join(dataset_base, "annotations/val.json"), os.path.join(dataset_base, "val/"))
+        if not hasattr(cfg.DATASETS, 'BASE_PATH'):
+            raise ValueError("Dataset path must be specified using --dataset argument")
+            
+        dataset_base = cfg.DATASETS.BASE_PATH
+        register_pothole_dataset(
+            "pothole_train", 
+            os.path.join(dataset_base, "annotations/train.json"),
+            os.path.join(dataset_base, "train/")
+        )
+        register_pothole_dataset(
+            "pothole_val", 
+            os.path.join(dataset_base, "annotations/val.json"),
+            os.path.join(dataset_base, "val/")
+        )
         # model with ema weights
         logger = logging.getLogger("detectron2.trainer")
         if cfg.MODEL_EMA.ENABLED:
@@ -274,6 +293,10 @@ def setup(args):
     cfg = get_cfg()
     add_diffusiondet_config(cfg)
     add_model_ema_configs(cfg)
+    
+    # Add dataset path to config
+    cfg.DATASETS.BASE_PATH = args.dataset
+    
     cfg.merge_from_file(args.config_file)
     cfg.merge_from_list(args.opts)
     cfg.freeze()
