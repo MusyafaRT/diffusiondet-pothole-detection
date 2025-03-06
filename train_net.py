@@ -102,6 +102,13 @@ class Trainer(DefaultTrainer):
             **kwargs,
         )
         self.start_iter = 0
+        if args.resume and self.checkpointer.has_checkpoint():
+            checkpoint = self.checkpointer.resume_or_load(
+                cfg.MODEL.WEIGHTS if len(cfg.MODEL.WEIGHTS) > 0 else self.checkpointer.get_checkpoint_file(), 
+                resume=True
+            )
+            if "iteration" in checkpoint:
+                self.start_iter = checkpoint["iteration"] + 1
         self.max_iter = cfg.SOLVER.MAX_ITER
         self.cfg = cfg
 
