@@ -19,6 +19,7 @@ import logging
 from collections import OrderedDict
 
 import torch
+import re
 from fvcore.nn.precise_bn import get_bn_modules
 
 import detectron2.utils.comm as comm
@@ -102,13 +103,13 @@ class Trainer(DefaultTrainer):
             **kwargs,
         )
         self.start_iter = 0
-        if self.checkpointer.has_checkpoint():
-            # Try to load from the specified weights if provided, otherwise use latest checkpoint
-            checkpoint_path = cfg.MODEL.WEIGHTS if len(cfg.MODEL.WEIGHTS) > 0 else self.checkpointer.get_checkpoint_file()
-            checkpoint = self.checkpointer.load(checkpoint_path)
-            if "iteration" in checkpoint:
-                self.start_iter = checkpoint["iteration"] + 20
-                print(f"Resuming from iteration {self.start_iter}")
+        if len(cfg.MODEL.WEIGHTS) > 0:
+            # Extract iteration from filename using regex pattern
+            match = re.search(r'model_(\d+)\.pth', cfg.MODEL.WEIGHTS)
+            if match:
+                iter_from_filename = int(match.group(1))
+                self.start_iter = iter_from_filename + 20
+                print(f"Resuming from iteration {self.start_iter} based on filename")
         self.max_iter = cfg.SOLVER.MAX_ITER
         self.cfg = cfg
 
